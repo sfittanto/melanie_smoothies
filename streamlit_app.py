@@ -1,6 +1,7 @@
 # Import python packages
+# Import Python packages
+import requests
 import streamlit as st
-#from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
 
 cnx = st.connection("snowflake")
@@ -10,10 +11,8 @@ st.title(":cup_with_straw: Customize Your Smoothie! :cup_with_straw:")
 
 st.write("Choose the fruits you want in your custom Smoothie!")
 
-import requests
-
-name_on_order = st.text_input('Name on Smoothie')
-st.write('The name for your Smoothie will be:', name_on_order)
+name_on_order = st.text_input("Name on Smoothie")
+st.write("The name for your Smoothie will be:", name_on_order)
 
 fruit_dataframe = (
     session.table("SMOOTHIES.PUBLIC.FRUIT_OPTIONS")
@@ -50,12 +49,22 @@ if ingredients_list and name_on_order:
 
         st.success("Your Smoothie is ordered!", icon="✅")
 
-smoothiefroot_response = requests.get(
-    "https://my.smoothiefroot.com/api/fruit/watermelon"
-)
-#st.text(smoothiefroot_response.json())
-sf_df = st.dataframe(
-    data=smoothiefroot_response.json(),
-    use_container_width=True
-)
+# Display nutrition information below the other app content
+if ingredients_list:
+    ingredients_string = ""
+
+    for fruit_chosen in ingredients_list:
+        ingredients_string = ingredients_string + fruit_chosen
+
+        st.subheader(fruit_chosen + " Nutrition Information")
+
+        smoothiefroot_response = requests.get(
+            "https://my.smoothiefroot.com/api/fruit/" + fruit_chosen
+        )
+
+        sf_df = st.dataframe(
+            data=smoothiefroot_response.json(),
+            use_container_width=True
+        )
+
 
